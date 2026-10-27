@@ -14,6 +14,7 @@
 - Q: Can project documents be shared outside their project? → A: No. Project- or task-associated documents may only be shared with existing project members.
 - Q: Can document owners revoke shares? → A: Yes. Owners can revoke a share at any time, immediately ending the recipient's access.
 - Q: Who is responsible for recovering local documents after data loss? → A: The training environment operator handles backups and recovery outside the application.
+- Q: How should malware scanning run asynchronously while preserving offline training? → A: Use a locally run Azure Functions Queue Storage trigger with Azurite; no cloud account or Azure Storage service is required at runtime.
 
 ## User Scenarios & Testing
 
@@ -33,6 +34,7 @@ An employee uploads one or more work documents, supplies the required title and 
 4. **Given** a file is detected as malicious or cannot be scanned, **When** its upload is processed, **Then** it is not stored as an available document and the user receives a clear failure status.
 5. **Given** a file passes validation and scanning, **When** it is stored, **Then** its upload time, uploader, file size, and file type are recorded automatically.
 6. **Given** the user has no internet connection, **When** they upload, browse, and manage documents in the training environment, **Then** core document management remains available without cloud services.
+7. **Given** a file passes upload validation, **When** its scan job is queued, **Then** the user sees a pending status and the file remains unavailable until the background worker records a clean scan result or a rejection.
 
 ### User Story 2 - Find and access authorized documents (Priority: P1)
 
@@ -131,12 +133,14 @@ An administrator reviews document activity and summarizes document types, upload
 - **FR-017**: The system MUST record uploads, downloads, deletions, and share actions with the actor, document, action, and time. Administrators MUST be able to review this activity and generate summaries of document types, uploader activity, and access patterns.
 - **FR-018**: Employees MUST access their own documents and documents explicitly shared with them or available through project membership. Team leads MUST be able to view and manage documents uploaded by users in their department. Project managers MUST be able to view and manage documents for projects they manage. Administrators MUST be able to view and download all documents, access administrative reports, and delete any document after confirmation; administrators MUST NOT edit metadata, replace files, or share documents. All access MUST be enforced for search, preview, download, update, replacement, deletion, and sharing.
 - **FR-019**: Core document management MUST work without cloud services or an internet connection and MUST store document content in the local training environment.
+- **FR-020**: Malware scanning MUST run asynchronously through a locally run Azure Functions Queue Storage trigger using Azurite in the offline training environment. The system MUST show pending status until a final scan result, process duplicate deliveries idempotently, and retry transient failures. Unscanned, rejected, or poison-queue files MUST remain unavailable; if a replacement scan fails, the previous clean document version MUST remain available.
 
 ### Key Entities
 
 - **Document**: A work file and its title, description, category, tags, type, size, upload time, owner, and optional project or task association.
 - **Document Share**: A permission granting a selected user or team access to a document, including the recipient and sharing details.
 - **Document Activity**: A record of a document action, its actor, the affected document, and when it occurred.
+- **Document Scan Job**: A queued unit of work tracking an upload or replacement scan through pending, processing, clean, rejected, or failed states.
 - **User**: An employee with a role, department/team, and ownership or access relationships to documents.
 - **Project and Task**: Existing work records that provide context and determine access for associated documents.
 
