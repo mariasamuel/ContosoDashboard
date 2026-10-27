@@ -1,50 +1,78 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+Version change: unratified template -> 1.0.0 (initial adoption)
+Modified principles: placeholders -> I. Training Focus; II. User Isolation and Authorization;
+	III. Layered Design; IV. Verifiable Changes; V. Deliberate Scope
+Added sections: Additional Constraints; Development Workflow
+Removed sections: none
+Templates: plan-template.md reviewed, no change; spec-template.md reviewed, no change;
+	tasks-template.md updated; constitution-template.md reviewed, no change;
+	checklist-template.md reviewed, no change
+Workflow guidance: speckit.tasks.agent.md updated; speckit.implement.agent.md updated
+Command templates: .specify/templates/commands/ does not exist; command guidance is in .github/agents/
+Follow-up TODOs: none
+-->
+# ContosoDashboard Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Training Focus
+This repository MUST remain a fictional training application. Features MUST serve the
+training purpose and MUST NOT describe mock behavior as production-ready. Cloud services,
+real identity providers, and production deployment are out of scope unless a feature
+specification explicitly includes them.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. User Isolation and Authorization
+Every new protected page MUST require authentication. Services that read or mutate
+user-owned data MUST enforce the requesting user's access at the service boundary;
+page-level authorization alone is insufficient. Access-control changes MUST cover
+anonymous access and unauthorized cross-user or cross-project access in verification.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Layered Design
+UI behavior belongs in Blazor pages and shared components, business rules and
+authorization belong in services, persistence belongs in the data layer, and domain
+entities belong in models. New code MUST follow these boundaries and use dependency
+injection for service dependencies. A feature MUST NOT add an external infrastructure
+dependency when an existing local implementation meets its stated requirements.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Verifiable Changes
+Behavior changes MUST include focused automated tests when a suitable test harness exists.
+When no suitable harness exists, the plan or task list MUST specify reproducible manual
+checks and disclose the automated-coverage gap. Changes to authorization MUST include
+checks for permitted and denied access. Application changes MUST pass the applicable
+build and test commands before completion.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Deliberate Scope
+Specifications MUST state user value, testable functional requirements, acceptance
+scenarios, and relevant edge cases. Implementation MUST stay within the approved scope;
+unrelated cleanup and new abstractions require separate justification. Success criteria
+MUST be objectively verifiable rather than relying on unmeasured terms such as "fast" or
+"secure."
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Additional Constraints
+The application targets .NET 8, ASP.NET Core, Blazor Server, and Entity Framework Core
+with SQL Server LocalDB for local training. The default workflow MUST remain usable
+without cloud accounts or external service dependencies. Authentication is a mock,
+password-free user-selection flow; it MUST NOT be treated as an identity security
+solution. Secrets and real credentials MUST NOT be committed to the repository.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Development Workflow
+Feature work MUST begin with a Spec Kit specification under `specs/` before implementation.
+The specification MUST be followed by a technical plan and dependency-ordered tasks when
+the change spans user behavior, data, services, authorization, or multiple pages. A
+localized bug fix may use a smaller workflow when its scope and verification are clear.
+Plans MUST evaluate the constitution, tasks MUST include the required verification, and
+implementation MUST update task status and relevant documentation. Reviewers MUST check
+the change against its specification and this constitution.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+This constitution governs project-specific engineering decisions. Amendments require
+explicit project-owner approval, a documented rationale, a semantic version update, and
+synchronization of affected templates and `.github/agents/` guidance in the same change.
+Versioning uses MAJOR for incompatible principle or governance changes, MINOR for new or
+materially expanded principles, and PATCH for clarifications that do not change meaning.
+Every feature plan MUST record constitution compliance; any deviation MUST be justified
+in the plan and accepted during review. The training-only and non-production boundary
+must be retained in user-facing project guidance.
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
-
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2026-10-26 | **Last Amended**: 2026-10-26

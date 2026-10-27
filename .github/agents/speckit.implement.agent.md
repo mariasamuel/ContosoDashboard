@@ -146,10 +146,10 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 7. Implementation execution rules:
    - **Setup first**: Initialize project structure, dependencies, configuration
-   - **Tests before code**: If you need to write tests for contracts, entities, and integration scenarios
+  - **Verification before completion**: Complete the verification tasks for each behavior change. Run focused automated tests when a suitable harness exists; otherwise perform the documented manual checks and report the automated-coverage limitation.
    - **Core development**: Implement models, services, CLI commands, endpoints
    - **Integration work**: Database connections, middleware, logging, external services
-   - **Polish and validation**: Unit tests, performance optimization, documentation
+  - **Polish and validation**: Required tests or manual checks, documentation, and any scoped performance work
 
 8. Progress tracking and error handling:
    - Report progress after each completed task
@@ -162,7 +162,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 9. Completion validation:
    - Verify all required tasks are completed
    - Check that implemented features match the original specification
-   - Validate that tests pass and coverage meets requirements
+  - Validate that automated tests pass when a suitable harness exists, or that documented manual checks pass when it does not
    - Confirm the implementation follows the technical plan
    - Report final status with summary of completed work
 
