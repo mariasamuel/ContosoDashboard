@@ -5,6 +5,16 @@
 **Status**: Draft  
 **Input**: Stakeholder requirements in `StakeholderDocs/document-upload-and-management-feature.md`
 
+## Clarifications
+
+### Session 2026-10-27
+
+- Q: What malware-scanning behavior should the offline training environment support? → A: Require a real, locally installed scanner; reject uploads if it is unavailable or inconclusive.
+- Q: What document-management permissions should administrators have? → A: View and download all documents, access audit reports, and delete any document after confirmation; no metadata edits, file replacement, or sharing.
+- Q: Can project documents be shared outside their project? → A: No. Project- or task-associated documents may only be shared with existing project members.
+- Q: Can document owners revoke shares? → A: Yes. Owners can revoke a share at any time, immediately ending the recipient's access.
+- Q: Who is responsible for recovering local documents after data loss? → A: The training environment operator handles backups and recovery outside the application.
+
 ## User Scenarios & Testing
 
 ### User Story 1 - Upload and organize documents (Priority: P1)
@@ -67,11 +77,12 @@ An owner shares a document with selected people or a team. Employees also access
 
 **Acceptance Scenarios**:
 
-1. **Given** a user owns a document, **When** they share it with a person or team, **Then** authorized recipients see it in “Shared with Me” and receive an in-app notification.
+1. **Given** a user owns a document, **When** they share it with a person or team, **Then** authorized recipients see it in “Shared with Me” and receive an in-app notification. For project- or task-associated documents, recipients MUST already be members of the associated project.
 2. **Given** a document is attached to a task, **When** a project member opens the task or project, **Then** the document is visible and access is consistent with the project's permissions.
 3. **Given** a new document is added to a project, **When** project members are eligible for project notifications, **Then** they receive an in-app notification.
 4. **Given** a user cannot access a linked project or task, **When** they follow a document link, **Then** access is denied.
 5. **Given** the current user has uploaded documents, **When** they open the dashboard, **Then** it shows their five most recently uploaded documents and the document count.
+6. **Given** a document owner revokes a share, **When** a former recipient attempts to access the document, **Then** access is immediately denied.
 
 ### User Story 5 - Review document activity (Priority: P3)
 
@@ -105,7 +116,7 @@ An administrator reviews document activity and summarizes document types, upload
 - **FR-002**: Each document MUST have a title and a category selected from Project Documents, Team Resources, Personal Files, Reports, Presentations, or Other. Description, project association, and custom tags MUST be optional.
 - **FR-003**: The system MUST record upload date and time, uploader, file size, and file type for each stored document.
 - **FR-004**: The system MUST accept PDF, Microsoft Word, Excel and PowerPoint documents, plain text files, JPEG images, and PNG images. It MUST reject unsupported file types and files larger than 25 MB with a clear reason.
-- **FR-005**: The system MUST scan files for malware before making them available. A file MUST NOT be stored as an available document if scanning detects malware, cannot run, or does not complete successfully.
+- **FR-005**: The system MUST scan files for malware using a real, locally installed scanning engine before making them available. A file MUST NOT be stored as an available document if scanning detects malware, the engine is unavailable, or scanning does not complete successfully.
 - **FR-006**: The upload experience MUST show progress and a clear per-file completion or failure result.
 - **FR-007**: Users MUST be able to browse their uploaded documents and sort by title, upload date, category, or file size, and filter by category, project, or date range.
 - **FR-008**: Users MUST be able to search document title, description, tags, uploader name, and associated project. Search results MUST be limited to documents the requesting user may access.
@@ -113,12 +124,12 @@ An administrator reviews document activity and summarizes document types, upload
 - **FR-010**: Users MUST be able to download documents they may access. Authorized users MUST be able to preview PDF and image files in the browser.
 - **FR-011**: Document owners MUST be able to update title, description, category, and tags, and replace a document file with an allowed file that passes scanning. Team leads MUST be able to update metadata and replace files for documents uploaded by users in their department. Project managers MUST be able to update metadata and replace files for documents associated with projects they manage.
 - **FR-012**: Owners MUST be able to permanently delete their documents after confirmation. Team leads MUST be able to delete documents uploaded by users in their department, and project managers MUST be able to delete documents associated with projects they manage. Administrators MUST be able to delete any document after confirmation. Deletion MUST revoke all access to the document and its file.
-- **FR-013**: Document owners MUST be able to share documents with selected users or teams. Recipients MUST see documents shared with them in a dedicated view and receive an in-app notification.
-- **FR-014**: Users MUST be able to associate documents with tasks. A task-associated document MUST also be associated with the task's project and follow that project's access rules.
+- **FR-013**: Document owners MUST be able to share documents with selected users or teams and revoke any share at any time. Revocation MUST immediately end the recipient's access. Recipients MUST see documents shared with them in a dedicated view and receive an in-app notification. A project- or task-associated document MUST only be shareable with existing members of its associated project.
+- **FR-014**: Users MUST be able to associate documents with tasks. A task-associated document MUST also be associated with the task's project and follow that project's access rules, including the restriction that it can only be shared with existing project members.
 - **FR-015**: The dashboard MUST show the five most recently uploaded documents belonging to the current user and include a document count in its summary.
 - **FR-016**: Project members MUST receive an in-app notification when a new document is added to one of their projects.
 - **FR-017**: The system MUST record uploads, downloads, deletions, and share actions with the actor, document, action, and time. Administrators MUST be able to review this activity and generate summaries of document types, uploader activity, and access patterns.
-- **FR-018**: Employees MUST access their own documents and documents explicitly shared with them or available through project membership. Team leads MUST be able to view and manage documents uploaded by users in their department. Project managers MUST be able to view and manage documents for projects they manage. Administrators MUST be able to view and download all documents and access administrative reports. All access MUST be enforced for search, preview, download, update, replacement, deletion, and sharing.
+- **FR-018**: Employees MUST access their own documents and documents explicitly shared with them or available through project membership. Team leads MUST be able to view and manage documents uploaded by users in their department. Project managers MUST be able to view and manage documents for projects they manage. Administrators MUST be able to view and download all documents, access administrative reports, and delete any document after confirmation; administrators MUST NOT edit metadata, replace files, or share documents. All access MUST be enforced for search, preview, download, update, replacement, deletion, and sharing.
 - **FR-019**: Core document management MUST work without cloud services or an internet connection and MUST store document content in the local training environment.
 
 ### Key Entities
@@ -142,14 +153,17 @@ An administrator reviews document activity and summarizes document types, upload
 - **SC-007**: Every unauthorized access case in the defined role and resource test matrix is denied for search, preview, download, edit, replacement, deletion, and sharing.
 - **SC-008**: A user can select files, provide required metadata, and submit an upload in no more than three primary actions after opening the upload experience, excluding text entry.
 - **SC-009**: At least 90% of users in task-based usability checks report that upload outcomes and document-sharing access are clear.
+- **SC-010**: Before training rollout, the operator has documented and successfully exercised a backup and restore procedure for local document files and related metadata.
 
 ## Assumptions
 
 - “Team” means users in the same department, consistent with the current dashboard team directory; project teams are determined by project membership.
-- Team-lead management includes viewing, editing metadata, replacing, and deleting documents uploaded by users in the same department. Project-manager management includes those actions for documents associated with projects they manage. Administrators can view and download all documents and use audit reports; other changes follow the owner and manager permissions above.
-- Offline malware scanning is available in the training environment. If scanning is unavailable or inconclusive, uploads fail closed and remain unavailable.
+- Explicit shares of documents associated with a project or task are limited to users who are current members of the associated project; a direct share does not grant access outside that project.
+- Team-lead management includes viewing, editing metadata, replacing, and deleting documents uploaded by users in the same department. Project-manager management includes those actions for documents associated with projects they manage. Administrators can view and download all documents, use audit reports, and delete any document after confirmation; they cannot edit metadata, replace files, or share documents.
+- A real malware-scanning engine is installed and available locally in the training environment. If the engine is unavailable or scanning is inconclusive, uploads fail closed and remain unavailable.
 - For a multi-file submission, each file succeeds or fails independently; a failure for one file does not discard other files that passed validation and scanning.
 - Document replacement updates the current document; version history and recovery are out of scope. Deleted document content is permanently removed, while the minimal activity record of deletion remains for audit reporting.
 - The existing mock authentication and role model remain in use. This feature does not make the application suitable for production or introduce a real identity provider.
+- Backups and recovery of local document files and metadata are managed by the training environment operator outside this application; the application does not provide document backup or recovery.
 - The initial release is web-only, does not include collaborative editing, approval workflows, external document-system integrations, storage quotas, or recoverable soft deletion.
 - The stakeholder's 8-10 week timeline is a planning target, not a feature acceptance criterion; production deployment and cloud migration are not part of this offline training feature.
